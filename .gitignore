@@ -34,3 +34,6 @@ override.tf.json
 # End of https://www.gitignore.io/api/terraform
 
 .idea/*
+
+deployment/production_key
+deployment/production_key.pub

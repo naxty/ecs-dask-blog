@@ -1,0 +1,23 @@
+[
+  {
+    "name": "fargate",
+    "image": "${image}",
+    "portMappings": [
+    ],
+    "memory": 8192,
+    "cpu": 4096,
+    "networkMode": "awsvpc",
+    "logConfiguration": {
+      "logDriver": "awslogs",
+      "options": {
+        "awslogs-group": "${log_group}",
+        "awslogs-region": "eu-west-2",
+        "awslogs-stream-prefix": "fargate"
+      }
+    },
+    "environment": [
+      {"name": "EXTRA_PIP_PACKAGES", "value": "s3fs"}
+    ],
+    "command": ["dask-worker", "${scheduler_ip}:8786", "--no-bokeh"]
+  }
+]

@@ -1,6 +1,9 @@
 
+data "http" "myip" {
+  url = "http://ipv4.icanhazip.com"
+}
+
 resource "aws_eip" "scheduler_ip" {
-  instance = "${aws_instance.scheduler.id}"
   vpc      = true
 }
 
@@ -20,26 +23,28 @@ resource "aws_security_group" "scheduler" {
     from_port = 443
     to_port = 443
     protocol = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
+    cidr_blocks = ["${chomp(data.http.myip.body)}/32"]
   }
 
   ingress {
     from_port = 8888
     to_port = 8888
     protocol = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
+    cidr_blocks = ["${chomp(data.http.myip.body)}/32"]
   }
   ingress {
     from_port = 8786
     to_port = 8786
     protocol = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
+    self = true
   }
   ingress {
     from_port = 8787
     to_port = 8787
     protocol = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
+    self = true
   }
   egress {
     from_port = 0
@@ -53,14 +58,23 @@ resource "aws_security_group" "scheduler" {
   }
 }
 
+data "template_file" "scheduler-userdata" {
+  template = "${file("${path.module}/user-data.sh")}"
+  vars {
+    private_scheduler_ip = "${aws_eip.scheduler_ip.private_ip}"
+  }
+}
+
 resource "aws_instance" "scheduler" {
   count = "1"
 
-  ami                    = "ami-01bee3897bba49d78"
+  ami                    = "ami-f976839e"
   instance_type          = "t2.xlarge"
   subnet_id              = "${element(var.public_subnet_ids, 0)}"
   key_name               = "${var.key_name}"
   vpc_security_group_ids = ["${var.security_groups_ids}", "${aws_security_group.scheduler.id}"]
+
+  user_data = "${data.template_file.scheduler-userdata.rendered}"
 
   #associate_public_ip_address = ""
   #ipv6_address_count          = "${var.ipv6_address_count}"
@@ -88,4 +102,10 @@ resource "aws_instance" "scheduler" {
     # we have to ignore changes in the following arguments
     ignore_changes = ["private_ip", "root_block_device", "ebs_block_device"]
   }
+}
+
+# We need to use an association, otherwise TF runs into a cycle
+resource "aws_eip_association" "eip_assoc" {
+  instance_id   = "${aws_instance.scheduler.id}"
+  allocation_id = "${aws_eip.scheduler_ip.id}"
 }

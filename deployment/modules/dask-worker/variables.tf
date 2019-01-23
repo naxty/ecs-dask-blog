@@ -25,11 +25,11 @@ variable "scheduler_ip" {
   description = "IP of the scheduler"
 }
 
-variable "fargate_image" {
+variable "dask_image" {
   description = "Image name in ecr of fargate_image"
 }
 
-variable "fargate_count" {
+variable "worker_count" {
   description = "Amount of fargate tasks"
   default = "0"
 }

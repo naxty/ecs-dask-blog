@@ -1,3 +1,7 @@
+variable "environment" {
+  description = "The environment"
+}
+
 variable "vpc_cidr" {
   description = "The CIDR block of the vpc"
 }
@@ -12,19 +16,12 @@ variable "private_subnets_cidr" {
   description = "The CIDR block for the private subnet"
 }
 
-variable "environment" {
-  description = "The environment"
-}
 
 variable "region" {
-  description = "The region to launch the bastion host"
+  description = "The region for the VPC"
 }
 
 variable "availability_zones" {
   type        = "list"
   description = "The az that the resources will be launched"
-}
-
-variable "key_name" {
-  description = "The public key for the bastion host"
 }

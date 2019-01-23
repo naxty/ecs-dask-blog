@@ -1,7 +1,7 @@
 [
   {
     "name": "fargate",
-    "image": "${image}",
+    "image": "${dask_image}",
     "portMappings": [
     ],
     "memory": 8192,

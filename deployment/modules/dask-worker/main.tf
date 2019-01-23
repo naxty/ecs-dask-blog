@@ -14,10 +14,9 @@ data "template_file" "fargate_task_service" {
   template = "${file("${path.module}/tasks/fargate_task_definition.json")}"
 
   vars {
-    image = "${var.fargate_image}"
+    dask_image = "${var.dask_image}"
     scheduler_ip = "${var.scheduler_ip}"
     REGION = "${var.region}"
-
     log_group = "${aws_cloudwatch_log_group.dask_ecs.name}"
 
   }
@@ -84,7 +83,7 @@ data "aws_ecs_task_definition" "fargate_service" {
 resource "aws_ecs_service" "fargate_service" {
   name = "${var.environment}-fargate_service"
   task_definition = "${aws_ecs_task_definition.fargate_service.family}:${max("${aws_ecs_task_definition.fargate_service.revision}", "${data.aws_ecs_task_definition.fargate_service.revision}")}"
-  desired_count = "${var.fargate_count}"
+  desired_count = "${var.worker_count}"
   launch_type = "FARGATE"
   cluster = "${aws_ecs_cluster.cluster.id}"
 

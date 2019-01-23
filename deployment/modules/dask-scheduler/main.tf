@@ -36,15 +36,15 @@ resource "aws_security_group" "scheduler" {
     from_port = 8786
     to_port = 8786
     protocol = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
+    cidr_blocks = ["${chomp(data.http.myip.body)}/32"]
     self = true
   }
   ingress {
     from_port = 8787
     to_port = 8787
     protocol = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
     self = true
+    cidr_blocks = ["${chomp(data.http.myip.body)}/32"]
   }
   egress {
     from_port = 0
@@ -100,7 +100,7 @@ resource "aws_instance" "scheduler" {
     # Due to several known issues in Terraform AWS provider related to arguments of aws_instance:
     # (eg, https://github.com/terraform-providers/terraform-provider-aws/issues/2036)
     # we have to ignore changes in the following arguments
-    ignore_changes = ["private_ip", "root_block_device", "ebs_block_device"]
+    ignore_changes = ["private_ip", "root_block_device", "ebs_block_device", "user_data"]
   }
 }
 
